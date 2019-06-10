@@ -1,0 +1,8 @@
+body {
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-flow: row wrap;
+}
