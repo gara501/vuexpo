@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <title>Vue state management</title>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/vuex"></script>
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web:300,400,600,700&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">  
+  </head>
+    <body>
+    <noscript>
+      <strong>We're sorry but notes doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app" class="app" :style="{ fontSize: postFontSize + 'em' }">
+      <h1>{{ message }}</h1>
+      <div class="compo">
+        <button-counter></button-counter>
+        <button-color></button-color>
+        <font-size></font-size>
+      </div>
+    </div>
+    <script>
+    Vue.component('button-counter', {
+      computed: {
+        count(state) {
+          return store.getters.count;
+        }
+      },
+      methods: {
+        increaseCounter(state, payload) {
+          store.dispatch('increment', payload);
+        }
+      },
+      template: `<div class="cmp">
+        <h2>Componente 1</h2>
+        <button @click="increaseCounter">Increase Counter</button>
+        <h4>{{ count }}</h4>
+      </div>`
+    })
+
+    Vue.component('button-color', {
+      computed: {
+        color(state) {
+          return store.getters.color;
+        }
+      },
+      methods: {
+        changeColor(state, payload) {
+          store.dispatch('changeColor', payload);
+        }
+      },
+      template: `
+      <div class="cmp">
+        <h2>Componente 2</h2>
+        <button :style="{ background: color }" v-on:click="changeColor">Background: {{ color }}</button>
+      </div>`
+    })
+
+    Vue.component('font-size', {
+      data: function () {
+        return {
+          message: 'Increase Text Size'
+        }
+      },
+      methods: {
+        increaseFont(state, payload) {
+          store.dispatch('increaseFont', .1);
+        }
+      },
+      template: `
+      <div class="cmp">
+        <h2>Componente 3</h2>
+        <button @click="increaseFont">{{message}}</button>
+      </div>`
+    })
+
+    const store = new Vuex.Store({
+      state: {
+        welcome: "Vuex, state management finally!",
+        postFontSize: 1,
+        color: 'rgb(233, 23, 22)',
+        counter: 0
+      },
+      mutations: {
+        INCREASE_FONT(state, payload) {
+          state.postFontSize += payload;
+        },
+        CHANGE_COLOR(state, payload) {
+          state.color = payload;
+        },
+        CHANGE_COUNTER(state, payload) {
+          state.counter += 1;
+        }
+      },
+      actions: {
+        increment(state, payload) {
+          state.commit('CHANGE_COUNTER', payload);
+        },
+        increaseFont(state, payload) {
+          state.commit('INCREASE_FONT', payload);
+        },
+        changeColor(state, payload){
+          let rgbn = [];
+          for (let i=0; i<=2; i++) {
+            rgbn.push(Math.floor(Math.random() * (255 - 0)) + 0);
+          }
+          let rgb = rgbn.join(',');
+          let formatted =  'rgb(' + rgb.split(',') + ')';
+          state.commit('CHANGE_COLOR', formatted);
+        }
+      },
+      getters: {
+        message(state) {
+          return state.welcome.toUpperCase();
+        },
+        count(state) {
+          return state.counter;
+        },
+        color(state) {
+          return state.color;
+        },
+        postFontSize(state) {
+          return state.postFontSize;
+        }
+      }
+    });
+
+    new Vue({
+      el: "#app",
+      computed: {
+        message() {
+          return store.getters.message;
+        },
+        postFontSize(state) {
+          return store.getters.postFontSize;
+        }
+      }
+    });
+    </script>
+  </body>
+</html>

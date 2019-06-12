@@ -7,7 +7,6 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>Vue state management</title>
     <script src="https://unpkg.com/vue"></script>
-    <script src="https://unpkg.com/vuex"></script>
     <link href="https://fonts.googleapis.com/css?family=Titillium+Web:300,400,600,700&display=swap" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">  
   </head>
@@ -15,28 +14,47 @@
     <noscript>
       <strong>We're sorry but notes doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app" class="app" :style="{ fontSize: postFontSize + 'em' }">
+    <div id="app" class="app">
       <h1>{{ welcome }}</h1>
-      <button-counter v-on:enlarge-text="postFontSize += 0.1"></button-counter>
-      <button-color></button-color>
+      <div class="compo">
+        <button-counter :counterval="counter"></button-counter>
+        <button-color :basecolor="color"></button-color>
+      </div>
     </div>
     <script>
     Vue.component('button-counter', {
+      props: ['counterval'],
       data: function () {
         return {
           count: 0
         }
       },
-      template: '<div><h2>Total: {{ count }}</h2><button v-on:click="count++">Increase Counter</button><button v-on:click="$emit(\'enlarge-text\')">Increase Text Size</button></div>'
+      created: () => {
+        this.count = this.counterval;
+      },
+      methods: {
+        increase (data) {
+          return this.count++;
+        }
+      },
+      template: `<div class="cmp">
+        <h2>Componente 1</h2>
+        <button @click="increase(count)">Increase Counter</button>
+        <h4>{{ count }}</h4>
+      </div>`
     })
 
     Vue.component('button-color', {
+      props: ['basecolor'],
       data: function () {
         return {
-          buttonColor: '#ff4400'
+          color: 'white'
         }
       },
-      methods: {      
+      created: () => {
+        this.color = this.baseColor;
+      },
+      methods: {
         randomNumber(){
           return Math.floor(Math.random() * (255 - 0)) + 0;
         },
@@ -44,29 +62,31 @@
           let rgbNumbers =[this.randomNumber(), this.randomNumber(), this.randomNumber()];
           let rgb = rgbNumbers.join(',');
           let formatted =  'rgb(' + rgb.split(',') + ')';
-          this.buttonColor = formatted;
-          return formatted;
+          this.color = formatted;
         }
       },
-      template: '<button :style="{ background: buttonColor }" v-on:click="changeColor">Background: {{ buttonColor }}</button>'
+      template: `
+      <div class="cmp">
+        <h2>Componente 2</h2>
+        <button :style="{ background: color }" @click="changeColor">Background: {{ color }}</button>
+      </div>`
     })
 
     new Vue({
       el: "#app",
       data() {
         return {
-          welcome: "Basic components management",
-          postFontSize: 1
+          welcome: "Basic props between Components",
+          color: 'rgb(233, 23, 22)',
+          counter: 0
         }
       },
       computed: {
         message() {
-          return store.state.message;
+          return welcome.toUpperCase();
         }
       }
     });
-
-    
     </script>
   </body>
 </html>
