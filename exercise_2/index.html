@@ -7,6 +7,7 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>Vue state management</title>
     <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/vuex"></script>
     <link href="https://fonts.googleapis.com/css?family=Titillium+Web:300,400,600,700&display=swap" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">  
   </head>
@@ -14,75 +15,82 @@
     <noscript>
       <strong>We're sorry but notes doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app" class="app" :style="{ fontSize: postFontSize + 'em' }">
+    <div id="app" class="app">
       <h1>{{ welcome }}</h1>
       <div class="compo">
-        <button-counter :counterval="counter" v-on:counterval-increase="counter += 1"></button-counter>
-        <button-color :basecolor="color" v-on:change-color="changeColor"></button-color>
-        <font-size v-on:enlarge-text="postFontSize += 0.1"></font-size>
+        <button-counter :counterval="counter"></button-counter>
       </div>
     </div>
     <script>
     Vue.component('button-counter', {
-      props: ['counterval'],
+      data: function () {
+        return {
+          count: 0,
+          timer: ""
+        }
+      },
+      computed: {
+        evenOrOdd() {
+          return this.count % 2 === 0 ? 'par' : 'impar';
+        }
+      },
+      methods: {
+        increment (data) {
+          return this.count++;
+        },
+        decrement (data) {
+          return this.count--;
+        },
+        incrementIfOdd (data) {
+          if ((this.count + 1) % 2 === 0) {
+            this.count++;
+          }
+        },
+        incrementAsync (data) {
+          return new Promise((resolve, reject) => {
+            this.timer = "Runing Async method";
+            setTimeout((time) => {
+              this.count++;
+              this.timer = "Done!";
+              resolve()
+            }, 1000)
+          })
+        }
+      },
       template: `<div class="cmp">
-        <h2>Componente 1</h2>
-        <button v-on:click="$emit('counterval-increase')">Increase Counter</button>
-        <h4>{{ counterval }}</h4>
+        <h4>Async time: {{timer}}</h4>
+        <h1>Clicked: {{ count }} veces, el numero actual es {{ evenOrOdd }}.</h1>
+        <button @click="increment">+</button>
+        <button @click="decrement">-</button>
+        <button @click="incrementIfOdd">Incrementar si es Impar</button>
+        <button @click="incrementAsync">Incrementar de forma asincrona</button>
       </div>`
     })
 
-    Vue.component('button-color', {
-      props: ['basecolor'],
-      data: function () {
-        return {
-          
-        }
+    const store = new Vuex.Store({
+      state: {
+        count: 0
       },
-      template: `
-      <div class="cmp">
-        <h2>Componente 2</h2>
-        <button :style="{ background: basecolor }" v-on:click="$emit('change-color')">Background: {{ basecolor }}</button>
-      </div>`
-    })
-
-    Vue.component('font-size', {
-      data: function () {
-        return {
-          message: 'Increase Text Size'
-        }
+      mutations: {
       },
-      template: `
-      <div class="cmp">
-        <h2>Componente 3</h2>
-        <button v-on:click="$emit('enlarge-text')">{{message}}</button>
-      </div>`
-    })
+      actions: {
+      },
+      getters: {
+      }
+    });
 
     new Vue({
       el: "#app",
       data() {
         return {
-          welcome: "Passing data between components",
-          postFontSize: 1,
+          welcome: "Basic props between Components",
           color: 'rgb(233, 23, 22)',
           counter: 0
         }
       },
-      methods: {
-        randomNumber(){
-          return Math.floor(Math.random() * (255 - 0)) + 0;
-        },
-        changeColor(){
-          let rgbNumbers =[this.randomNumber(), this.randomNumber(), this.randomNumber()];
-          let rgb = rgbNumbers.join(',');
-          let formatted =  'rgb(' + rgb.split(',') + ')';
-          this.color = formatted;
-        }
-      },
       computed: {
         message() {
-          return store.state.message;
+          return welcome.toUpperCase();
         }
       }
     });
